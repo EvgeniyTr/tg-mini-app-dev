@@ -171,14 +171,29 @@
         // setInterval(()=>{
         //   el.innerText = number++;
         // }, 1000);
+        let receivedClose = false;
         let bc = new BroadcastChannel('close-app');
         bc.onmessage = (e)=>{
+          receivedClose = true;
           re.innerText = 'received:' + e.data;
           closeApp();
         }
         const sendText = Math.random()
         se.innerText = 'send:' + sendText;
         bc.postMessage(sendText);
+
+        document.addEventListener("visibilitychange", function() {
+          if (document.hidden) {
+            console.log("页面不可见");
+          } else {
+            console.log("页面可见");
+            if (receivedClose) {
+              Telegram.WebApp.showAlert('going reload');
+              location.reload();
+            }
+            // 可以在这里恢复需要的操作，比如重新加载数据等
+          }
+        });
         // setTimeout(()=>{
         //   closeApp();
         // }, 10000);
