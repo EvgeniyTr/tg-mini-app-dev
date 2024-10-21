@@ -87,7 +87,7 @@
         <h1>Buttons</h1>
         <button onclick="Telegram.WebApp.expand();">Expand Webview.</button>
         <button onclick="toggleMainButton();">Toggle Main Button.</button>
-        <button onclick="closeApp();"> close this app.</button>
+        <button onclick="closeApp();"> close this app..</button>
         <h1>count</h1>
         <p id="send"></p>
         <p id="receive"></p>
@@ -179,9 +179,9 @@
         const sendText = Math.random()
         se.innerText = 'send:' + sendText;
         bc.postMessage(sendText);
-        setTimeout(()=>{
-          closeApp();
-        }, 10000);
+        // setTimeout(()=>{
+        //   closeApp();
+        // }, 10000);
     </script>
 
     <!-- Eruda is console for mobile browsers -->
