@@ -165,29 +165,29 @@
         Telegram.WebApp.onEvent('themeChanged', function() {
             document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
         });
-
+        const se = document.getElementById('send');
+        const re = document.getElementById('receive');
+        let number = 0;
+        // setInterval(()=>{
+        //   el.innerText = number++;
+        // }, 1000);
+        let bc = new BroadcastChannel('close-app');
+        bc.onmessage = (e)=>{
+          re.innerText = 'received:' + e.data;
+          close();
+        }
+        const sendText = Math.random()
+        se.innerText = 'send:' + sendText;
+        bc.postMessage(sendText);
+        setTimeout(()=>{
+          close();
+        }, 10000);
     </script>
 
     <!-- Eruda is console for mobile browsers -->
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
 
-<script>
-    const se = document.getElementById('send');
-    const re = document.getElementById('receive');
-    let number = 0;
-    // setInterval(()=>{
-    //   el.innerText = number++;
-    // }, 1000);
-    let bc = new BroadcastChannel('close-app');
-    bc.onmessage = (e)=>{
-      re.innerText = 'received:' + e.data;
-      close();
-    }
-    const sendText = Math.random()
-    se.innerText = 'send:' + sendText;
-    bc.postMessage(sendText)
 
-</script>
 </body>
 </html>
