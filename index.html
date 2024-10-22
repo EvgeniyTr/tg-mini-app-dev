@@ -64,9 +64,7 @@
 
 <body>
     <main>
-        <div align="center">
-            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
-        </div>
+        <script> document.write(new Date().toLocaleString())</script>
         <h1>Modals</h1>
         <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
         <button onclick="showPopup();">Launch Popup</button>
@@ -176,23 +174,24 @@
         bc.onmessage = (e)=>{
           receivedClose = true;
           re.innerText = 'received:' + e.data;
+          location.reload();
           closeApp();
         }
         const sendText = Math.random()
         se.innerText = 'send:' + sendText;
         bc.postMessage(sendText);
 
-        document.addEventListener("visibilitychange", function() {
-          if (document.hidden) {
-            console.log("页面不可见");
-          } else {
-            console.log("页面可见");
-            if (receivedClose) {
-              closeApp();
-            }
-            // 可以在这里恢复需要的操作，比如重新加载数据等
-          }
-        });
+        // document.addEventListener("visibilitychange", function() {
+        //   if (document.hidden) {
+        //     console.log("页面不可见");
+        //   } else {
+        //     console.log("页面可见");
+        //     if (receivedClose) {
+        //       closeApp();
+        //     }
+        //     // 可以在这里恢复需要的操作，比如重新加载数据等
+        //   }
+        // });
         // setTimeout(()=>{
         //   closeApp();
         // }, 10000);
