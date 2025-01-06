@@ -97,8 +97,8 @@ function openDB() {
           function getAllDataFromDB() {
       return new Promise(async (resolve, reject) => {
         const db = await openDB();
-        const transaction = db.transaction(['childStore'], 'readonly');
-        const store = transaction.objectStore('childStore');
+        const transaction = db.transaction(['users'], 'readonly');
+        const store = transaction.objectStore('users');
         const request = store.getAll();
 
         request.onsuccess = (event) => {
