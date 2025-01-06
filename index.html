@@ -63,96 +63,106 @@
 </head>
 
 <body>
-    <main>
-        <div align="center">
-            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
-        </div>
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
-
-        <h1>Links</h1>
-        <ul>
-            <li>
-                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
-        </ul>
-
-        <h1>Buttons</h1>
-        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-    </main>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
+     old site
+    
+    <button id="doCreate">create</button>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // Init TWA
         Telegram.WebApp.ready();
+     /**
+ * 创建/升级数据库，并写入示例数据
+ * @returns {Promise<void>}
+ */
+async function createAndWriteIDB() {
+  return new Promise((resolve, reject) => {
+    // 1. 打开/创建数据库
+    // 参数1: 数据库名称
+    // 参数2: 数据库版本（若要对结构进行更新，需要+1）
+    const request = indexedDB.open('MyDatabase', 1);
 
-        // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.documentElement.className = Telegram.WebApp.colorScheme;
+    // 2. 数据库版本升级时触发
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      
+      // 如果对象存储不存在，则创建对象存储
+      // 第一个参数为对象存储名称，第二个参数为主键模式（Key Path）
+      if (!db.objectStoreNames.contains('users')) {
+        const objectStore = db.createObjectStore('users', {
+          keyPath: 'id',         // 主键字段
+          autoIncrement: true,   // 自动递增
         });
+        
+        // 可以为对象存储中的字段创建索引（可选）
+        // objectStore.createIndex('nameIndex', 'name', { unique: false });
+      }
+    };
 
-        // Show main button
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Main Button'
-        });
-        Telegram.WebApp.MainButton.onClick(function () {
-            Telegram.WebApp.showAlert('Main Button was clicked')
-        });	
-        Telegram.WebApp.MainButton.show();
+    // 3. 成功打开数据库
+    request.onsuccess = (event) => {
+      const db = event.target.result;
 
-        // Function to call showPopup API
-        function showPopup() {
-            Telegram.WebApp.showPopup({
-                title: 'Title',
-                message: 'Some message',
-                buttons: [
-                    {id: 'link', type: 'default', text: 'Open ton.org'},
-                    {type: 'cancel'},
-                ]
-            }, function(btn) {
-                if (btn === 'link') {
-                    Telegram.WebApp.openLink('https://ton.org/');
-                }
-            });
+      // 开始一个读写事务，事务指定对象存储名称和访问模式
+      const transaction = db.transaction(['users'], 'readwrite');
+      const objectStore = transaction.objectStore('users');
+
+      // 要写入的数据，可以是数组或单个对象
+      const dataToInsert = [
+        { name: 'Alice', age: 25 },
+        { name: 'Bob', age: 30 },
+      ];
+
+      dataToInsert.forEach((item) => {
+        const addRequest = objectStore.add(item);
+        
+        addRequest.onsuccess = () => {
+          console.log('数据写入成功：', item);
         };
-
-        // Function to toggle main TWA button
-        function toggleMainButton() {
-            if (Telegram.WebApp.MainButton.isVisible) {
-                Telegram.WebApp.MainButton.hide();
-            } else {
-                Telegram.WebApp.MainButton.show();
-            }
+        addRequest.onerror = (err) => {
+          console.error('数据写入失败：', err);
         };
+      });
 
-        function setViewportData() {
-            var sizeEl = document.getElementById('viewport-params-size');
-            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-                'height: ' + Telegram.WebApp.viewportStableHeight;
+      // 事务完成时触发
+      transaction.oncomplete = () => {
+        console.log('数据全部写入完成');
+        db.close();
+        resolve();
+      };
 
-            var expandEl = document.querySelector('#viewport-params-expand');
-            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
-        }
+      // 事务出错时触发
+      transaction.onerror = (err) => {
+        console.error('事务失败：', err);
+        reject(err);
+      };
+    };
 
-        Telegram.WebApp.setHeaderColor('secondary_bg_color');
+    // 4. 打开数据库失败
+    request.onerror = (err) => {
+      console.error('打开数据库失败：', err);
+      reject(err);
+    };
+  });
+}
 
-        setViewportData();
-        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+function doCreate() {
 
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
-        });
+    // 调用示例
+createAndWriteIDB()
+  .then(() => {
+    console.log('创建并写入 IDB 完成');
+  })
+  .catch((err) => {
+    console.error('操作失败：', err);
+  });
+}
+          // 获取按钮元素
+    const btn = document.getElementById('doCreate');
 
+    // 为按钮绑定 click 事件回调
+    btn.addEventListener('click', function() {
+      doCreate();
+    });
     </script>
 
     <!-- Eruda is console for mobile browsers -->
